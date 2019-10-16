@@ -57,6 +57,7 @@ public class FlowLayout extends ViewGroup {
     private int mRowVerticalGravity = ROW_VERTICAL_GRAVITY_AUTO;
     private int mExactMeasuredHeight;
     private int showMoreButtonIndex = 0;
+    private int showMoreButtonDefaultIndex = 0;
 
     private List<Float> mHorizontalSpacingForRow = new ArrayList<>();
     private List<Integer> mHeightForRow = new ArrayList<>();
@@ -126,6 +127,12 @@ public class FlowLayout extends ViewGroup {
                 this.getChildAt(showMoreButtonIndex).getTag().toString().equals(SHOW_MORE_BUTTON_TAG)) {
             childShowMoreBtn = (TextView) this.getChildAt(showMoreButtonIndex);
             this.removeViewAt(showMoreButtonIndex);
+        } // This is for the situation we click show less button and add back the +X button to index 0
+        else if (this.getChildAt(showMoreButtonDefaultIndex) != null &&
+                this.getChildAt(showMoreButtonDefaultIndex).getTag() != null &&
+                this.getChildAt(showMoreButtonDefaultIndex).getTag().toString().equals(SHOW_MORE_BUTTON_TAG)) {
+            childShowMoreBtn = (TextView) this.getChildAt(showMoreButtonDefaultIndex);
+            this.removeViewAt(showMoreButtonDefaultIndex);
         }
 
         int measuredHeight = 0, measuredWidth = 0, childCount = getChildCount();
