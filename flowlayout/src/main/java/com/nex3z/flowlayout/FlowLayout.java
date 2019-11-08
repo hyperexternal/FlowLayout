@@ -65,7 +65,7 @@ public class FlowLayout extends ViewGroup {
     private int showMoreButtonIndex = 0;
     private int showLessButtonIndex = 0;
     private int showMoreButtonDefaultIndex = 0;
-    public int mMode = -1;
+    private int mMode = -1;
 
     private List<Float> mHorizontalSpacingForRow = new ArrayList<>();
     private List<Integer> mHeightForRow = new ArrayList<>();
