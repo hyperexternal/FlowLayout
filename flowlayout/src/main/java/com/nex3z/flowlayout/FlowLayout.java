@@ -44,6 +44,10 @@ public class FlowLayout extends ViewGroup {
     private static final boolean DEFAULT_RTL = false;
     private static final int DEFAULT_MAX_ROWS = Integer.MAX_VALUE;
     public static final String SHOW_MORE_BUTTON_TAG = "show_more_button_tag";
+    public static final String SHOW_LESS_BUTTON_TAG = "show_less_button_tag";
+
+    public static final int RECENT_HISTORY_MODE = 0;
+    public static final int EVENT_HISTORY_MODE = 1;
 
     private boolean mFlow = DEFAULT_FLOW;
     private int mChildSpacing = DEFAULT_CHILD_SPACING;
@@ -57,7 +61,9 @@ public class FlowLayout extends ViewGroup {
     private int mRowVerticalGravity = ROW_VERTICAL_GRAVITY_AUTO;
     private int mExactMeasuredHeight;
     private int showMoreButtonIndex = 0;
+    private int showLessButtonIndex = 0;
     private int showMoreButtonDefaultIndex = 0;
+    public int mMode = -1;
 
     private List<Float> mHorizontalSpacingForRow = new ArrayList<>();
     private List<Integer> mHeightForRow = new ArrayList<>();
@@ -120,8 +126,24 @@ public class FlowLayout extends ViewGroup {
         mChildNumForRow.clear();
 
         TextView childShowMoreBtn = null;
+        TextView childShowLessBtn = null;
+        showLessButtonIndex = getChildCount() - 1;
         // If the child view at showMoreButtonIndex is the +X button, we remove it and store its
         // reference
+
+//        for (int i = 0; i < getChildCount(); i++) {
+//            if (this.getChildAt(i) != null && this.getChildAt(i).getTag() != null &&
+//                    this.getChildAt(i).getTag().toString().equals(SHOW_MORE_BUTTON_TAG)) {
+//                childShowMoreBtn = (TextView) this.getChildAt(i);
+//                this.removeViewAt(i);
+//            } else if (this.getChildAt(i) != null &&
+//                    this.getChildAt(i).getTag() != null &&
+//                    this.getChildAt(i).getTag().toString().equals(SHOW_LESS_BUTTON_TAG)) {
+//                childShowLessBtn = (TextView) this.getChildAt(i);
+//                this.removeViewAt(i);
+//            }
+//        }
+
         if (this.getChildAt(showMoreButtonIndex) != null &&
                 this.getChildAt(showMoreButtonIndex).getTag() != null &&
                 this.getChildAt(showMoreButtonIndex).getTag().toString().equals(SHOW_MORE_BUTTON_TAG)) {
@@ -133,6 +155,11 @@ public class FlowLayout extends ViewGroup {
                 this.getChildAt(showMoreButtonDefaultIndex).getTag().toString().equals(SHOW_MORE_BUTTON_TAG)) {
             childShowMoreBtn = (TextView) this.getChildAt(showMoreButtonDefaultIndex);
             this.removeViewAt(showMoreButtonDefaultIndex);
+        }else if (this.getChildAt(showLessButtonIndex) != null &&
+                this.getChildAt(showLessButtonIndex).getTag() != null &&
+                this.getChildAt(showLessButtonIndex).getTag().toString().equals(SHOW_LESS_BUTTON_TAG)) {
+            childShowLessBtn = (TextView) this.getChildAt(showLessButtonIndex);
+            this.removeViewAt(showLessButtonIndex);
         }
 
         int measuredHeight = 0, measuredWidth = 0, childCount = getChildCount();
@@ -308,6 +335,14 @@ public class FlowLayout extends ViewGroup {
                 rowWidth += childWidth + tmpSpacing;
                 rowTotalChildWidth += childWidth;
                 maxChildHeightInRow = Math.max(maxChildHeightInRow, childHeight);
+            }
+
+            if (i == childCount - 1 && childShowLessBtn != null &&
+                    (mChildNumForRow.size() > getDefaultLimit(mMode) || (mChildNumForRow.size() == getDefaultLimit(mMode) && childNumInRow != 0)) &&
+                    getDefaultLimit(mMode) != Integer.MAX_VALUE) {
+                this.addView(childShowLessBtn);
+                childCount++;
+                childShowLessBtn = null;
             }
         }
 
@@ -661,5 +696,24 @@ public class FlowLayout extends ViewGroup {
     private float dpToPx(float dp) {
         return TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
+    }
+
+    private int getDefaultLimit(int mode) {
+        switch (mode) {
+            case RECENT_HISTORY_MODE:
+                return 10;
+            case EVENT_HISTORY_MODE:
+                return 2;
+            default:
+                return Integer.MAX_VALUE;
+        }
+    }
+
+    public int getmMode() {
+        return mMode;
+    }
+
+    public void setmMode(int mMode) {
+        this.mMode = mMode;
     }
 }
