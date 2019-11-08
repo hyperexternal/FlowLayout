@@ -325,9 +325,9 @@ public class FlowLayout extends ViewGroup {
                 maxChildHeightInRow = Math.max(maxChildHeightInRow, childHeight);
             }
 
-            if (i == childCount - 1 && childShowLessBtn != null &&
-                    (mChildNumForRow.size() > getDefaultLimit(mMode) || (mChildNumForRow.size() == getDefaultLimit(mMode) && childNumInRow != 0)) &&
-                    getDefaultLimit(mMode) != Integer.MAX_VALUE) {
+            if (i == childCount - 1 && isInExpandedMode(childShowLessBtn) &&
+                    isCardViewExceedDefaultRowLimit(childNumInRow) &&
+                    isInEventOrRecentHistoryMode()) {
                 this.addView(childShowLessBtn);
                 childCount++;
                 childShowLessBtn = null;
@@ -398,6 +398,18 @@ public class FlowLayout extends ViewGroup {
         measuredHeight = heightMode == MeasureSpec.EXACTLY ? heightSize : measuredHeight;
 
         setMeasuredDimension(measuredWidth, measuredHeight);
+    }
+
+    private boolean isInEventOrRecentHistoryMode() {
+        return getDefaultLimit(mMode) != DEFAULT_MAX_ROWS;
+    }
+
+    private boolean isCardViewExceedDefaultRowLimit(int childNumInRow) {
+        return mChildNumForRow.size() > getDefaultLimit(mMode) || (mChildNumForRow.size() == getDefaultLimit(mMode) && childNumInRow != 0);
+    }
+
+    private boolean isInExpandedMode(TextView childShowLessBtn) {
+        return childShowLessBtn != null;
     }
 
     private String getRemainingChildrenCountString(int remainingChildrenCount) {
@@ -693,7 +705,7 @@ public class FlowLayout extends ViewGroup {
             case EVENT_HISTORY_MODE:
                 return EVENT_HISTORY_DEFAULT_LIMIT;
             default:
-                return Integer.MAX_VALUE;
+                return DEFAULT_MAX_ROWS;
         }
     }
 
