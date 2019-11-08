@@ -48,6 +48,8 @@ public class FlowLayout extends ViewGroup {
 
     public static final int RECENT_HISTORY_MODE = 0;
     public static final int EVENT_HISTORY_MODE = 1;
+    public static final int RECENT_HISTORY_DEFAULT_LIMIT = 10;
+    public static final int EVENT_HISTORY_DEFAULT_LIMIT = 2;
 
     private boolean mFlow = DEFAULT_FLOW;
     private int mChildSpacing = DEFAULT_CHILD_SPACING;
@@ -130,20 +132,6 @@ public class FlowLayout extends ViewGroup {
         showLessButtonIndex = getChildCount() - 1;
         // If the child view at showMoreButtonIndex is the +X button, we remove it and store its
         // reference
-
-//        for (int i = 0; i < getChildCount(); i++) {
-//            if (this.getChildAt(i) != null && this.getChildAt(i).getTag() != null &&
-//                    this.getChildAt(i).getTag().toString().equals(SHOW_MORE_BUTTON_TAG)) {
-//                childShowMoreBtn = (TextView) this.getChildAt(i);
-//                this.removeViewAt(i);
-//            } else if (this.getChildAt(i) != null &&
-//                    this.getChildAt(i).getTag() != null &&
-//                    this.getChildAt(i).getTag().toString().equals(SHOW_LESS_BUTTON_TAG)) {
-//                childShowLessBtn = (TextView) this.getChildAt(i);
-//                this.removeViewAt(i);
-//            }
-//        }
-
         if (this.getChildAt(showMoreButtonIndex) != null &&
                 this.getChildAt(showMoreButtonIndex).getTag() != null &&
                 this.getChildAt(showMoreButtonIndex).getTag().toString().equals(SHOW_MORE_BUTTON_TAG)) {
@@ -701,19 +689,19 @@ public class FlowLayout extends ViewGroup {
     private int getDefaultLimit(int mode) {
         switch (mode) {
             case RECENT_HISTORY_MODE:
-                return 10;
+                return RECENT_HISTORY_DEFAULT_LIMIT;
             case EVENT_HISTORY_MODE:
-                return 2;
+                return EVENT_HISTORY_DEFAULT_LIMIT;
             default:
                 return Integer.MAX_VALUE;
         }
     }
 
-    public int getmMode() {
+    public int getMode() {
         return mMode;
     }
 
-    public void setmMode(int mMode) {
+    public void setMode(int mMode) {
         this.mMode = mMode;
     }
 }
