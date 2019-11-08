@@ -47,9 +47,9 @@ public class FlowLayout extends ViewGroup {
     public static final String SHOW_LESS_BUTTON_TAG = "show_less_button_tag";
 
     public static final int RECENT_HISTORY_MODE = 0;
-    public static final int EVENT_HISTORY_MODE = 1;
+    public static final int CALENDAR_MODE = 1;
     public static final int RECENT_HISTORY_DEFAULT_LIMIT = 10;
-    public static final int EVENT_HISTORY_DEFAULT_LIMIT = 2;
+    public static final int CALENDAR_DEFAULT_LIMIT = 2;
 
     private boolean mFlow = DEFAULT_FLOW;
     private int mChildSpacing = DEFAULT_CHILD_SPACING;
@@ -143,7 +143,7 @@ public class FlowLayout extends ViewGroup {
                 this.getChildAt(showMoreButtonDefaultIndex).getTag().toString().equals(SHOW_MORE_BUTTON_TAG)) {
             childShowMoreBtn = (TextView) this.getChildAt(showMoreButtonDefaultIndex);
             this.removeViewAt(showMoreButtonDefaultIndex);
-        }else if (this.getChildAt(showLessButtonIndex) != null &&
+        } else if (this.getChildAt(showLessButtonIndex) != null &&
                 this.getChildAt(showLessButtonIndex).getTag() != null &&
                 this.getChildAt(showLessButtonIndex).getTag().toString().equals(SHOW_LESS_BUTTON_TAG)) {
             childShowLessBtn = (TextView) this.getChildAt(showLessButtonIndex);
@@ -325,9 +325,10 @@ public class FlowLayout extends ViewGroup {
                 maxChildHeightInRow = Math.max(maxChildHeightInRow, childHeight);
             }
 
-            if (i == childCount - 1 && isInExpandedMode(childShowLessBtn) &&
-                    isCardViewExceedDefaultRowLimit(childNumInRow) &&
-                    isInEventOrRecentHistoryMode()) {
+            if (i == childCount - 1 &&
+                    isInExpandedMode(childShowLessBtn) &&
+                    isDefaultRowLimitExceeded(childNumInRow) &&
+                    isInCalendarOrRecentHistoryMode()) {
                 this.addView(childShowLessBtn);
                 childCount++;
                 childShowLessBtn = null;
@@ -400,12 +401,15 @@ public class FlowLayout extends ViewGroup {
         setMeasuredDimension(measuredWidth, measuredHeight);
     }
 
-    private boolean isInEventOrRecentHistoryMode() {
+    private boolean isInCalendarOrRecentHistoryMode() {
         return getDefaultLimit(mMode) != DEFAULT_MAX_ROWS;
     }
 
-    private boolean isCardViewExceedDefaultRowLimit(int childNumInRow) {
-        return mChildNumForRow.size() > getDefaultLimit(mMode) || (mChildNumForRow.size() == getDefaultLimit(mMode) && childNumInRow != 0);
+    private boolean isDefaultRowLimitExceeded(int childNumInRow) {
+        boolean childRowCountStrictlyExceedsRowLimit = mChildNumForRow.size() > getDefaultLimit(mMode);
+        boolean childRowCountMatchesRowLimitButHasExtraChildren = mChildNumForRow.size() == getDefaultLimit(mMode) && childNumInRow != 0;
+
+        return childRowCountStrictlyExceedsRowLimit || childRowCountMatchesRowLimitButHasExtraChildren;
     }
 
     private boolean isInExpandedMode(TextView childShowLessBtn) {
@@ -702,8 +706,8 @@ public class FlowLayout extends ViewGroup {
         switch (mode) {
             case RECENT_HISTORY_MODE:
                 return RECENT_HISTORY_DEFAULT_LIMIT;
-            case EVENT_HISTORY_MODE:
-                return EVENT_HISTORY_DEFAULT_LIMIT;
+            case CALENDAR_MODE:
+                return CALENDAR_DEFAULT_LIMIT;
             default:
                 return DEFAULT_MAX_ROWS;
         }
