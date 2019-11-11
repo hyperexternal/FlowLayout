@@ -44,6 +44,12 @@ public class FlowLayout extends ViewGroup {
     private static final boolean DEFAULT_RTL = false;
     private static final int DEFAULT_MAX_ROWS = Integer.MAX_VALUE;
     public static final String SHOW_MORE_BUTTON_TAG = "show_more_button_tag";
+    public static final String SHOW_LESS_BUTTON_TAG = "show_less_button_tag";
+
+    public static final int RECENT_HISTORY_MODE = 0;
+    public static final int CALENDAR_MODE = 1;
+    public static final int RECENT_HISTORY_DEFAULT_LIMIT = 10;
+    public static final int CALENDAR_DEFAULT_LIMIT = 2;
 
     private boolean mFlow = DEFAULT_FLOW;
     private int mChildSpacing = DEFAULT_CHILD_SPACING;
@@ -57,7 +63,9 @@ public class FlowLayout extends ViewGroup {
     private int mRowVerticalGravity = ROW_VERTICAL_GRAVITY_AUTO;
     private int mExactMeasuredHeight;
     private int showMoreButtonIndex = 0;
+    private int showLessButtonIndex = 0;
     private int showMoreButtonDefaultIndex = 0;
+    private int mMode = -1;
 
     private List<Float> mHorizontalSpacingForRow = new ArrayList<>();
     private List<Integer> mHeightForRow = new ArrayList<>();
@@ -120,6 +128,8 @@ public class FlowLayout extends ViewGroup {
         mChildNumForRow.clear();
 
         TextView childShowMoreBtn = null;
+        TextView childShowLessBtn = null;
+        showLessButtonIndex = getChildCount() - 1;
         // If the child view at showMoreButtonIndex is the +X button, we remove it and store its
         // reference
         if (this.getChildAt(showMoreButtonIndex) != null &&
@@ -133,6 +143,11 @@ public class FlowLayout extends ViewGroup {
                 this.getChildAt(showMoreButtonDefaultIndex).getTag().toString().equals(SHOW_MORE_BUTTON_TAG)) {
             childShowMoreBtn = (TextView) this.getChildAt(showMoreButtonDefaultIndex);
             this.removeViewAt(showMoreButtonDefaultIndex);
+        } else if (this.getChildAt(showLessButtonIndex) != null &&
+                this.getChildAt(showLessButtonIndex).getTag() != null &&
+                this.getChildAt(showLessButtonIndex).getTag().toString().equals(SHOW_LESS_BUTTON_TAG)) {
+            childShowLessBtn = (TextView) this.getChildAt(showLessButtonIndex);
+            this.removeViewAt(showLessButtonIndex);
         }
 
         int measuredHeight = 0, measuredWidth = 0, childCount = getChildCount();
@@ -309,6 +324,15 @@ public class FlowLayout extends ViewGroup {
                 rowTotalChildWidth += childWidth;
                 maxChildHeightInRow = Math.max(maxChildHeightInRow, childHeight);
             }
+
+            if (i == childCount - 1 &&
+                    isInExpandedMode(childShowLessBtn) &&
+                    isDefaultRowLimitExceeded(childNumInRow) &&
+                    isInCalendarOrRecentHistoryMode()) {
+                this.addView(childShowLessBtn);
+                childCount++;
+                childShowLessBtn = null;
+            }
         }
 
         // Measure remaining child views in the last row
@@ -375,6 +399,21 @@ public class FlowLayout extends ViewGroup {
         measuredHeight = heightMode == MeasureSpec.EXACTLY ? heightSize : measuredHeight;
 
         setMeasuredDimension(measuredWidth, measuredHeight);
+    }
+
+    private boolean isInCalendarOrRecentHistoryMode() {
+        return getDefaultLimit(mMode) != DEFAULT_MAX_ROWS;
+    }
+
+    private boolean isDefaultRowLimitExceeded(int childNumInRow) {
+        boolean childRowCountStrictlyExceedsRowLimit = mChildNumForRow.size() > getDefaultLimit(mMode);
+        boolean childRowCountMatchesRowLimitButHasExtraChildren = mChildNumForRow.size() == getDefaultLimit(mMode) && childNumInRow != 0;
+
+        return childRowCountStrictlyExceedsRowLimit || childRowCountMatchesRowLimitButHasExtraChildren;
+    }
+
+    private boolean isInExpandedMode(TextView childShowLessBtn) {
+        return childShowLessBtn != null;
     }
 
     private String getRemainingChildrenCountString(int remainingChildrenCount) {
@@ -661,5 +700,24 @@ public class FlowLayout extends ViewGroup {
     private float dpToPx(float dp) {
         return TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
+    }
+
+    private int getDefaultLimit(int mode) {
+        switch (mode) {
+            case RECENT_HISTORY_MODE:
+                return RECENT_HISTORY_DEFAULT_LIMIT;
+            case CALENDAR_MODE:
+                return CALENDAR_DEFAULT_LIMIT;
+            default:
+                return DEFAULT_MAX_ROWS;
+        }
+    }
+
+    public int getMode() {
+        return mMode;
+    }
+
+    public void setMode(int mMode) {
+        this.mMode = mMode;
     }
 }
